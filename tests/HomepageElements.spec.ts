@@ -34,3 +34,14 @@ test('Verify currency list items', async ({page}) => {
         }
     }
 })
+
+test('Verify promo section', async ({page}) => {
+
+    const promoBanner = page.locator('.promo_section'); 
+
+    const promoHeadings = ['Fast shipping', 'Easy Payments', 'Shipping Options', 'Large Variety'];
+
+    for (const heading of promoHeadings) {
+        await expect(promoBanner.getByRole('heading', { name: heading })).toContainText(heading);
+    }
+})
