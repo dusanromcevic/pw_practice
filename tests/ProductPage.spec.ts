@@ -1,26 +1,27 @@
-import{test, expect} from '@playwright/test';
+import { test, expect } from '@playwright/test'
+import { NavigationPage } from '../pages/NavigationPage'
+import { ProductPage } from '../pages/ProductPage'
 
-test.beforeEach(async ({page}) => {
-    await page.goto('/');
-    await page.locator('#block_frame_featured_1769').getByRole('link', { name: 'Skinsheen Bronzer Stick' }).click();   
-});
+test.describe('Product Page', () => {
 
-test('Verify product name and price', async ({page}) => {
+    test.beforeEach(async ({ page }) => {
+        const nav = new NavigationPage(page)
+        await nav.goToHome()
+        await nav.goToFeaturedProduct('Skinsheen Bronzer Stick')
+    })
 
-    const productName = page.locator('#product_details').getByText('Skinsheen Bronzer Stick');
-    const productPrice = page.locator('.productpageprice').getByText('$29.50');
+    test('Verify product name and price', async ({ page }) => {
+        const productPage = new ProductPage(page)
 
-    await expect(productName).toContainText('Skinsheen Bronzer Stick');
-    await expect(productPrice).toContainText('$29.50'); 
-})
+        await expect(productPage.productName).toContainText('Skinsheen Bronzer Stick')
+        await expect(productPage.productPrice).toContainText('$29.50')
+    })
 
-test('Verify price change when increasing quantity', async ({page}) => {
+    test('Verify price change when increasing quantity', async ({ page }) => {
+        const productPage = new ProductPage(page)
 
-    const quantityInput = page.locator('#product_quantity');
+        await productPage.setQuantity(2)
 
-    await quantityInput.fill('2', { timeout: 2000 });
-
-    const totalPrice = page.locator('.total-price');
-
-    await expect(totalPrice).toContainText('$59.00');
+        await expect(productPage.totalPrice).toContainText('$59.00')
+    })
 })

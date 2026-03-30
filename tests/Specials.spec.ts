@@ -1,43 +1,39 @@
-import{test, expect} from '@playwright/test';
+import { test, expect } from '@playwright/test'
+import { NavigationPage } from '../pages/NavigationPage'
+import { SpecialsPage } from '../pages/SpecialsPage'
 
-test.beforeEach(async ({page}) => {
-    await page.goto('/');
-    await page.getByRole('link', { name: '  Specials' }).click();   
-})
+test.describe('Specials Page', () => {
 
+    test.beforeEach(async ({ page }) => {
+        const nav = new NavigationPage(page)
+        await nav.goToHome()
+        await nav.goToSpecials()
+    })
 
-test('Verify the products displayed have the Specials label', async ({page}) => {
+    test('Verify the products displayed have the Sale label', async ({ page }) => {
+        const specialsPage = new SpecialsPage(page)
 
-// Product cards — scoped by the column wrapper that contains each product
-const productCards = page.locator('.col-md-3.col-sm-6.col-xs-12')
+        await expect(specialsPage.productCards).toHaveCount(8)
 
-await expect(productCards).toHaveCount(8)
+        const allCards = await specialsPage.productCards.all()
 
-const allCards = await productCards.all()
+        for (const card of allCards) {
+            await expect(specialsPage.getSaleLabel(card)).toBeVisible()
+        }
+    })
 
-for (const card of allCards) {
-    // .sale has no text content — CSS-only rendered, so user-facing locator isn't possible here
-    const saleLabel = card.locator('span.sale')
-    await expect(saleLabel).toBeVisible()
-}
+    test('Sale price is lower than original price for all products', async ({ page }) => {
+        const specialsPage = new SpecialsPage(page)
 
-})
+        await expect(specialsPage.productCards).toHaveCount(8)
 
+        const allCards = await specialsPage.productCards.all()
 
-test('Sale price is lower than original price for all products', async ({ page }) => {
+        for (const card of allCards) {
+            const newPrice = await specialsPage.parsePrice(specialsPage.getNewPrice(card))
+            const oldPrice = await specialsPage.parsePrice(specialsPage.getOldPrice(card))
 
-    const productCards = page.locator('.col-md-3.col-sm-6.col-xs-12')
-    await expect(productCards).toHaveCount(8)
-
-    const allCards = await productCards.all()
-
-    for (const card of allCards) {
-        const newPriceText = await card.locator('.pricenew').textContent()
-        const oldPriceText = await card.locator('.priceold').textContent()
-
-        const newPrice = Number(newPriceText?.replace('$', ''))
-        const oldPrice = Number(oldPriceText?.replace('$', ''))
-
-        expect(newPrice).toBeLessThan(oldPrice)
-    }
+            expect(newPrice).toBeLessThan(oldPrice)
+        }
+    })
 })

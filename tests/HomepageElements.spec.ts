@@ -1,47 +1,101 @@
-import {test, expect} from '@playwright/test';
+import { test, expect } from '@playwright/test'
+import { NavigationPage } from '../pages/NavigationPage'
+import { HomePage } from '../pages/HomePage'
 
+const expectedMenu = [
+    {
+        category: 'Apparel & accessories',
+        subItems: ['Shoes', 'T-shirts']
+    },
+    {
+        category: 'Makeup',
+        subItems: ['Cheeks', 'Eyes', 'Face', 'Lips', 'Nails', 'Value Sets']
+    },
+    {
+        category: 'Skincare',
+        subItems: ['Eyes', 'Face', 'Gift Ideas & Sets', 'Hands & Nails', 'Sun']
+    },
+    {
+        category: 'Fragrance',
+        subItems: ['Men', 'Women']
+    },
+    {
+        category: 'Men',
+        subItems: ['Body & Shower', 'Fragrance Sets', 'Pre-Shave & Shaving', 'Skincare']
+    },
+    {
+        category: 'Hair Care',
+        subItems: ['Conditioner', 'Shampoo']
+    },
+    {
+        category: 'Books',
+        subItems: ['Audio CD', 'Paperback']
+    },
+]
 
-test.beforeEach(async ({page}) => {
-    await page.goto('');
-});
+test.describe('Homepage', () => {
 
-test('Verify currency list items', async ({page}) => {
+    let homePage: HomePage
 
-    const currencyPicker = page.locator('a.dropdown-toggle').first();
+    test.beforeEach(async ({ page }) => {
+        const nav = new NavigationPage(page)
+        await nav.goToHome()
+        homePage = new HomePage(page)
+    })
 
-    await currencyPicker.hover();
+    test.describe('Currency', () => {
 
-    const currencyOptions = page.locator('.dropdown-menu.currency').getByRole('listitem');
+        test('Verify currency list items', async ({ page }) => {
+            await homePage.openCurrencyPicker()
+            await expect(homePage.currencyOptions).toContainText(['Euro', 'Pound Sterling', 'US Dollar'])
 
+            const currencies: { [key: string]: RegExp } = {
+                'Euro': /currency=EUR/,
+                'Pound Sterling': /currency=GBP/,
+                'US Dollar': /currency=USD/
+            }
 
-    const euro = currencyOptions.filter({ hasText: 'Euro' })
-    const poundSterling = currencyOptions.filter({ hasText: 'Pound Sterling' })
-    const usDollar = currencyOptions.filter({ hasText: 'US Dollar' })
+            for (const currency in currencies) {
+                await homePage.selectCurrency(currency as 'Euro' | 'Pound Sterling' | 'US Dollar')
+                await expect(page).toHaveURL(currencies[currency])
+            }
+        })
+    })
 
-    await expect(currencyOptions).toContainText(['Euro', 'Pound Sterling', 'US Dollar']);
+    test.describe('Promo Section', () => {
 
-    const currencies: { [key: string]: RegExp } = {
-        'Euro': /currency=EUR/,
-        'Pound Sterling': /currency=GBP/,
-        'US Dollar': /currency=USD/
-    }
+        test('Verify promo section headings', async () => {
+            const promoHeadings = ['Fast shipping', 'Easy Payments', 'Shipping Options', 'Large Variety']
 
-    for( const currency in currencies) {
-        await currencyOptions.filter({ hasText: currency }).click();
-        await expect(page).toHaveURL(currencies[currency]);
-        if (currency !== 'US Dollar') {
-        await currencyPicker.hover();
-        }
-    }
-})
+            for (const heading of promoHeadings) {
+                await expect(homePage.promoBanner.getByRole('heading', { name: heading }))
+                    .toContainText(heading)
+            }
+        })
+    })
 
-test('Verify promo section', async ({page}) => {
+    test.describe('Navigation Visibility', () => {
 
-    const promoBanner = page.locator('.promo_section'); 
+        test('top-level nav items have correct text', async () => {
+            for (const menuEntry of expectedMenu) {
+                const navItemLocator = homePage.getNavItem(menuEntry.category)
+                const actualCategoryText = await navItemLocator.textContent()
+                await expect(navItemLocator).toHaveText(actualCategoryText!)
+            }
+        })
 
-    const promoHeadings = ['Fast shipping', 'Easy Payments', 'Shipping Options', 'Large Variety'];
+        test('subcategory items are visible and have correct text on hover', async () => {
+            for (const menuEntry of expectedMenu) {
+                await homePage.hoverNavItem(menuEntry.category)
 
-    for (const heading of promoHeadings) {
-        await expect(promoBanner.getByRole('heading', { name: heading })).toContainText(heading);
-    }
+                for (const subItem of menuEntry.subItems) {
+                    const subItemLocator = homePage.getSubItem(menuEntry.category, subItem)
+                    const actualSubItemText = await subItemLocator.textContent()
+
+                    await expect(subItemLocator).toBeVisible()
+                    await expect(subItemLocator).toHaveText(actualSubItemText!)
+                }
+            }
+        })
+    })
 })
