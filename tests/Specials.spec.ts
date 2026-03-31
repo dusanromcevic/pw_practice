@@ -1,37 +1,34 @@
 import { test, expect } from '@playwright/test'
-import { NavigationPage } from '../pages/NavigationPage'
-import { SpecialsPage } from '../pages/SpecialsPage'
+import { PageManager } from '../pages/PageManager'
 
 test.describe('Specials Page', () => {
 
+    let pm: PageManager
+
     test.beforeEach(async ({ page }) => {
-        const nav = new NavigationPage(page)
-        await nav.goToHome()
-        await nav.goToSpecials()
+        pm = new PageManager(page)
+        await pm.navigateTo().goToHome()
+        await pm.navigateTo().goToSpecials()
     })
 
-    test('Verify the products displayed have the Sale label', async ({ page }) => {
-        const specialsPage = new SpecialsPage(page)
+    test('Verify the products displayed have the Sale label', async () => {
+        await expect(pm.onSpecials().productCards).toHaveCount(8)
 
-        await expect(specialsPage.productCards).toHaveCount(8)
-
-        const allCards = await specialsPage.productCards.all()
+        const allCards = await pm.onSpecials().productCards.all()
 
         for (const card of allCards) {
-            await expect(specialsPage.getSaleLabel(card)).toBeVisible()
+            await expect(pm.onSpecials().getSaleLabel(card)).toBeVisible()
         }
     })
 
-    test('Sale price is lower than original price for all products', async ({ page }) => {
-        const specialsPage = new SpecialsPage(page)
+    test('Sale price is lower than original price for all products', async () => {
+        await expect(pm.onSpecials().productCards).toHaveCount(8)
 
-        await expect(specialsPage.productCards).toHaveCount(8)
-
-        const allCards = await specialsPage.productCards.all()
+        const allCards = await pm.onSpecials().productCards.all()
 
         for (const card of allCards) {
-            const newPrice = await specialsPage.parsePrice(specialsPage.getNewPrice(card))
-            const oldPrice = await specialsPage.parsePrice(specialsPage.getOldPrice(card))
+            const newPrice = await pm.onSpecials().parsePrice(pm.onSpecials().getNewPrice(card))
+            const oldPrice = await pm.onSpecials().parsePrice(pm.onSpecials().getOldPrice(card))
 
             expect(newPrice).toBeLessThan(oldPrice)
         }

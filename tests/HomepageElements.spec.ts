@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { NavigationPage } from '../pages/NavigationPage'
-import { HomePage } from '../pages/HomePage'
+import { PageManager } from '../pages/PageManager'
 
 const expectedMenu = [
     {
@@ -35,19 +34,18 @@ const expectedMenu = [
 
 test.describe('Homepage', () => {
 
-    let homePage: HomePage
+    let pm: PageManager
 
     test.beforeEach(async ({ page }) => {
-        const nav = new NavigationPage(page)
-        await nav.goToHome()
-        homePage = new HomePage(page)
+        pm = new PageManager(page)
+        await pm.navigateTo().goToHome()
     })
 
     test.describe('Currency', () => {
 
         test('Verify currency list items', async ({ page }) => {
-            await homePage.openCurrencyPicker()
-            await expect(homePage.currencyOptions).toContainText(['Euro', 'Pound Sterling', 'US Dollar'])
+            await pm.onHomePage().openCurrencyPicker()
+            await expect(pm.onHomePage().currencyOptions).toContainText(['Euro', 'Pound Sterling', 'US Dollar'])
 
             const currencies: { [key: string]: RegExp } = {
                 'Euro': /currency=EUR/,
@@ -56,7 +54,7 @@ test.describe('Homepage', () => {
             }
 
             for (const currency in currencies) {
-                await homePage.selectCurrency(currency as 'Euro' | 'Pound Sterling' | 'US Dollar')
+                await pm.onHomePage().selectCurrency(currency as 'Euro' | 'Pound Sterling' | 'US Dollar')
                 await expect(page).toHaveURL(currencies[currency])
             }
         })
@@ -68,7 +66,7 @@ test.describe('Homepage', () => {
             const promoHeadings = ['Fast shipping', 'Easy Payments', 'Shipping Options', 'Large Variety']
 
             for (const heading of promoHeadings) {
-                await expect(homePage.promoBanner.getByRole('heading', { name: heading }))
+                await expect(pm.onHomePage().promoBanner.getByRole('heading', { name: heading }))
                     .toContainText(heading)
             }
         })
@@ -78,7 +76,7 @@ test.describe('Homepage', () => {
 
         test('top-level nav items have correct text', async () => {
             for (const menuEntry of expectedMenu) {
-                const navItemLocator = homePage.getNavItem(menuEntry.category)
+                const navItemLocator = pm.onHomePage().getNavItem(menuEntry.category)
                 const actualCategoryText = await navItemLocator.textContent()
                 await expect(navItemLocator).toHaveText(actualCategoryText!)
             }
@@ -86,10 +84,10 @@ test.describe('Homepage', () => {
 
         test('subcategory items are visible and have correct text on hover', async () => {
             for (const menuEntry of expectedMenu) {
-                await homePage.hoverNavItem(menuEntry.category)
+                await pm.onHomePage().hoverNavItem(menuEntry.category)
 
                 for (const subItem of menuEntry.subItems) {
-                    const subItemLocator = homePage.getSubItem(menuEntry.category, subItem)
+                    const subItemLocator = pm.onHomePage().getSubItem(menuEntry.category, subItem)
                     const actualSubItemText = await subItemLocator.textContent()
 
                     await expect(subItemLocator).toBeVisible()

@@ -43,6 +43,12 @@ export class HomePage {
             .getByRole('link')
     }
 
+    /**
+     * 
+     * @param categoryName The name of the top-level category
+     * @param subItemName The name of the sub-item
+     * @returns The locator for the specified sub-item
+     */
     getSubItem(categoryName: string, subItemName: string): Locator {
         return this.getNavItemContainer(categoryName)
             .locator('ul')
@@ -53,6 +59,11 @@ export class HomePage {
     async openCurrencyPicker(): Promise<void> {
         await this.currencyPicker.hover()
     }
+
+    /**
+     * These were the three available currencies in the dropdown
+     * @param currency The currency to select
+     */
 
     async selectCurrency(currency: 'Euro' | 'Pound Sterling' | 'US Dollar'): Promise<void> {
         await this.openCurrencyPicker()

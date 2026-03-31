@@ -1,12 +1,12 @@
 import { Page, Locator } from '@playwright/test'
+import { HelperBase } from './HelperBase'
 
-export class SpecialsPage {
+export class SpecialsPage extends HelperBase {
 
-    readonly page: Page
     readonly productCards: Locator
 
     constructor(page: Page) {
-        this.page = page
+        super(page)
         this.productCards = page.locator('.col-md-3.col-sm-6.col-xs-12')
     }
 
@@ -22,9 +22,6 @@ export class SpecialsPage {
         return card.locator('.priceold')
     }
 
-    // Price parsing logic lives here — spec never needs to know about $ or string conversion
-    async parsePrice(locator: Locator): Promise<number> {
-        const text = await locator.textContent()
-        return Number(text?.replace('$', ''))
-    }
+    // parsePrice removed — inherited from HelperBase
+    // any other page object that needs price parsing can also use it directly
 }

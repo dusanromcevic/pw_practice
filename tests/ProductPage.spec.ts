@@ -1,27 +1,25 @@
 import { test, expect } from '@playwright/test'
-import { NavigationPage } from '../pages/NavigationPage'
-import { ProductPage } from '../pages/ProductPage'
+import { PageManager } from '../pages/PageManager'
+import { time } from 'node:console'
 
 test.describe('Product Page', () => {
 
+    let pm: PageManager
+
     test.beforeEach(async ({ page }) => {
-        const nav = new NavigationPage(page)
-        await nav.goToHome()
-        await nav.goToFeaturedProduct('Skinsheen Bronzer Stick')
+        pm = new PageManager(page)
+        await pm.navigateTo().goToHome()
+        await pm.navigateTo().goToFeaturedProduct('Skinsheen Bronzer Stick')
     })
 
-    test('Verify product name and price', async ({ page }) => {
-        const productPage = new ProductPage(page)
-
-        await expect(productPage.productName).toContainText('Skinsheen Bronzer Stick')
-        await expect(productPage.productPrice).toContainText('$29.50')
+    test('Verify product name and price', async () => {
+        await expect(pm.onProduct().productName).toContainText('Skinsheen Bronzer Stick')
+        await expect(pm.onProduct().productPrice).toContainText('$29.50')
     })
 
-    test('Verify price change when increasing quantity', async ({ page }) => {
-        const productPage = new ProductPage(page)
+    test('Verify price change when increasing quantity', async () => {
+        await pm.onProduct().setQuantity(2)
 
-        await productPage.setQuantity(2)
-
-        await expect(productPage.totalPrice).toContainText('$59.00')
+        await expect(pm.onProduct().totalPrice).toContainText('$59.00', { timeout: 5000 })
     })
 })
