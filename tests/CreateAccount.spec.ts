@@ -29,16 +29,17 @@ test.describe('Account Creation', () => {
 
         test('Successfully register with valid details', async () => {
 
-            const credentialsPath = path.join(process.cwd(), 'test-data/credentials.json')
+        const credentialsPath = path.join(process.cwd(), 'test-data/credentials.json')
+        const forceRegistration = process.env.FORCE_REGISTRATION === 'true'
 
-            // Skip registration if credentials already exist — reuse them instead
-            if (fs.existsSync(credentialsPath)) {
-                console.log('credentials.json already exists — skipping registration')
-                return
+        // Skip cleanly if credentials exist and we're not forcing a fresh registration
+        // test.skip() marks the test as skipped in the report — more honest than return
+        if (fs.existsSync(credentialsPath) && !forceRegistration) {
+            test.skip(true, 'Credentials already exist — set FORCE_REGISTRATION=true to re-register')
+            return
         }
-            // Generate all credentials — MailSlurp inbox created here
-            // Only runs if no credentials exist yet
-            const credentials = await generateAccountCredentials()
+
+        const credentials = await generateAccountCredentials()
 
             // Fill the form section by section
             await pm.onCreateAccount().fillPersonalDetails(
