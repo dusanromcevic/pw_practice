@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
-    "test:registration": "FORCE_REGISTRATION=true playwright test CreateAccount.spec.ts",
+    "test:registration": "cross-env FORCE_REGISTRATION=true playwright test CreateAccount.spec.ts",
     "test:login": "playwright test Login.spec.ts",
     "test:checkout": "playwright test GuestCheckout.spec.ts"
   },
@@ -16,7 +16,7 @@
   "devDependencies": {
     "@faker-js/faker": "^10.4.0",
     "@playwright/test": "^1.58.2",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.5.2",
     "cross-env": "^10.1.0",
     "dotenv": "^17.3.1"
   },

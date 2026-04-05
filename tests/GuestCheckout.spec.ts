@@ -2,6 +2,7 @@ import { test, expect, Page } from '@playwright/test'
 import { PageManager } from '../pages/PageManager'
 import { loadCredentials } from '../helpers/credentialManager'
 import MailSlurp from 'mailslurp-client'
+import { MatchOptionFieldEnum, MatchOptionShouldEnum } from 'mailslurp-client/dist/generated/models/MatchOption'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -107,15 +108,26 @@ test.describe('Guest Checkout', () => {
         await expect(pm.onOrderSuccess().successHeading).toBeVisible({ timeout: 15000 })
     })
 
-    test('Order confirmation email is received via MailSlurp', async () => {
-        // Wait up to 30 seconds for the email to arrive
-        const email = await mailslurp.waitForLatestEmail(
-            credentials.inboxId,
-            30000,
-            true
-        )
+test('Order confirmation email is received via MailSlurp', async () => {
+    const emails = await mailslurp.waitForMatchingEmails(
+        {
+            matches: [
+                {
+                    field: MatchOptionFieldEnum.SUBJECT,
+                    should: MatchOptionShouldEnum.CONTAIN,
+                    value: 'Order'
+                }
+            ]
+        },
+        1,           // count — wait for at least 1 matching email
+        credentials.inboxId,
+        30000,       // timeout in ms
+        true         // unread only
+    )
 
-        expect(email.subject).toContain('Order')
-        expect(email.body).toContain(PRODUCT_NAME)
-    })
+    const fullEmail = await mailslurp.getEmail(emails[0].id!)
+
+    expect(fullEmail.subject).toContain('Order')
+    expect(fullEmail.body).toContain(PRODUCT_NAME)
+})
 })

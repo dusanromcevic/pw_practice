@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
-//import 'dotenv/config'
+import 'dotenv/config'
 
-require('dotenv').config();
+//require('dotenv').config();
 
 export default defineConfig({
 
