@@ -25,8 +25,8 @@ export class LoginPage extends HelperBase {
     }
 
     async login(loginName: string, password: string): Promise<void> {
-        await this.loginNameInput.fill(loginName)
-        await this.passwordInput.fill(password)
+        await this.loginNameInput.pressSequentially(loginName, { delay: 100 })
+        await this.passwordInput.pressSequentially(password, { delay: 100 })
         await this.loginButton.click()
-    }
+}
 }

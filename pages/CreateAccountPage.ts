@@ -77,10 +77,10 @@ export class CreateAccountPage extends HelperBase {
         email: string,
         telephone: string
     ): Promise<void> {
-        await this.firstNameInput.pressSequentially(firstName, { delay: 100 })
-        await this.lastNameInput.pressSequentially(lastName, { delay: 100 })
-        await this.emailInput.pressSequentially(email, { delay: 100 })
-        await this.telephoneInput.pressSequentially(telephone, { delay: 100 })
+        await this.firstNameInput.fill(firstName)
+        await this.lastNameInput.fill(lastName)
+        await this.emailInput.fill(email)
+        await this.telephoneInput.fill(telephone)
     }
 
     async fillAddress(
@@ -88,9 +88,9 @@ export class CreateAccountPage extends HelperBase {
         city: string,
         zipCode: string
     ): Promise<void> {
-        await this.address1Input.pressSequentially(address1, { delay: 100 })
-        await this.cityInput.pressSequentially(city, { delay: 100 })
-        await this.zipCodeInput.pressSequentially(zipCode, { delay: 100 })
+        await this.address1Input.fill(address1)
+        await this.cityInput.fill(city)
+        await this.zipCodeInput.fill(zipCode)
     }
 
     // Country is pre-selected as United Kingdom on page load — this method
@@ -111,9 +111,9 @@ export class CreateAccountPage extends HelperBase {
         loginName: string,
         password: string
     ): Promise<void> {
-        await this.loginNameInput.pressSequentially(loginName, { delay: 100 })
-        await this.passwordInput.pressSequentially(password, { delay: 100 })
-        await this.passwordConfirmInput.pressSequentially(password, { delay: 100 })
+        await this.loginNameInput.fill(loginName)
+        await this.passwordInput.fill(password)
+        await this.passwordConfirmInput.fill(password)
     }
 
     async subscribeNewsletter(subscribe: boolean): Promise<void> {
