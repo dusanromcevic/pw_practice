@@ -32,6 +32,19 @@ export class CreateAccountPage extends HelperBase {
     // --- Success ---
     readonly successMessage: Locator
 
+    // --- Validation errors ---
+    readonly topAlertError: Locator
+    readonly firstNameError: Locator
+    readonly emailError: Locator
+    readonly passwordError: Locator
+    readonly passwordConfirmError: Locator
+
+    readonly lastNameError:  Locator
+    readonly address1Error:  Locator
+    readonly cityError:      Locator
+    readonly zipCodeError:   Locator
+    readonly loginNameError: Locator
+
     constructor(page: Page) {
         super(page)
 
@@ -63,6 +76,18 @@ export class CreateAccountPage extends HelperBase {
 
         // Success
         this.successMessage        = page.locator('span.maintext')
+
+        // Validation errors — user-facing text, no CSS selectors needed
+        this.topAlertError        = page.locator('div.alert-danger')
+        this.firstNameError       = page.locator('span.help-block', { hasText: 'First Name must be between 1 and 32 characters!' })
+        this.emailError           = page.locator('span.help-block', { hasText: 'Email Address does not appear to be valid!' })
+        this.passwordError        = page.locator('span.help-block', { hasText: 'Password must be between 4 and 20 characters!' })
+        this.passwordConfirmError = page.locator('span.help-block', { hasText: 'Password confirmation does not match password!' })
+        this.lastNameError  = page.locator('span.help-block', { hasText: 'Last Name must be between 1 and 32 characters!' })
+        this.address1Error  = page.locator('span.help-block', { hasText: 'Address 1 must be between 3 and 128 characters!' })
+        this.cityError      = page.locator('span.help-block', { hasText: 'City must be between 3 and 128 characters!' })
+        this.zipCodeError   = page.locator('span.help-block', { hasText: 'Zip/postal code must be between 3 and 10 characters!' })
+        this.loginNameError = page.locator('span.help-block', { hasText: 'Login name must be alphanumeric only and between 5 and 64 characters!' })
     }
 
     // --- Heading ---
@@ -93,15 +118,11 @@ export class CreateAccountPage extends HelperBase {
         await this.zipCodeInput.fill(zipCode)
     }
 
-    // Country is pre-selected as United Kingdom on page load — this method
-    // is available for future tests that need a different country
     async selectCountry(countryValue: string): Promise<void> {
         await this.countrySelect.selectOption({ value: countryValue })
         await this.regionSelect.waitFor({ state: 'visible' })
     }
 
-    // Selects region by option value — more reliable than label matching
-    // Greater London = '3553', see form HTML for full list of values
     async selectRegion(regionValue: string): Promise<void> {
         await this.regionSelect.waitFor({ state: 'visible' })
         await this.regionSelect.selectOption({ value: regionValue })
